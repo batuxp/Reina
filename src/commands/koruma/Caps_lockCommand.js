@@ -1,0 +1,32 @@
+const BaseCommand = require('../../utils/structures/BaseCommand');
+const { Database } = require('npm.db');
+const { MessageEmbed } = require('discord.js');
+const db = new Database('koruma');
+module.exports = class Caps_lockCommand extends BaseCommand {
+  constructor() {
+    super('caps-lock', 'koruma', []);
+  }
+
+  run(client, message, args) {
+    if(!message.member.permissions.has('ADMINISTRATOR')) return message.reply('Bunun için yeterli yetkin yok');
+    if(!args[0]) return message.reply('Bu özelliği açman ya da kapaman lazım. Örn: `!caps-lock aç` veya `!caps-lock kapat`');
+    const durum = db.get(`caps_lock.${message.guild.id}`);
+    if(args[0] === "aç"){
+      if(durum) return message.reply('Bu özellik zaten açık');
+      const embed = new MessageEmbed()
+      .setTitle('İşlem Başarılı')
+      .setDescription('Caps Lock Engel özelliği bu sunucu için başarıyla açıldı')
+      message.channel.send(embed);
+      db.set(`caps_lock.${message.guild.id}`, true);
+    }else if(args[0] === "kapat"){
+      if(!durum) return message.reply('Bu özellik zaten kapalıymış');
+      const embed = new MessageEmbed()
+      .setTitle('İşlem Başarılı')
+      .setDescription('Caps Lock Engel özelliği bu sunucu için başarıyla kapatıldı')
+      message.channel.send(embed);
+      db.delete(`caps_lock.${message.guild.id}`);
+    }else{
+      message.reply('Bu özelliği açman ya da kapaman lazım. Örn: `!caps-lock aç` veya `!caps-lock kapat`');
+    }
+  }
+}
